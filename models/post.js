@@ -1,15 +1,17 @@
 const mongoose = require('mongoose');
-const kittySchema = new mongoose.Schema({
-    name: String
+const postSchema = new mongoose.Schema({
+    title: String,
+    desc: String,
+    created: Date
 });
 
-kittySchema.methods.speak = function speak() {
-    const greeting = this.name
-        ? "Meow name is " + this.name
-        : "I don't have a name";
-    console.log(greeting);
-};
+// kittySchema.methods.speak = function speak() {
+//     const greeting = this.name
+//         ? "Meow name is " + this.name
+//         : "I don't have a name";
+//     console.log(greeting);
+// };
 
-const Kitten = mongoose.model('Kitten', kittySchema);
-exports.Kitten = Kitten
+const Post = mongoose.model('Post', postSchema);
+exports.Post = Post
 
