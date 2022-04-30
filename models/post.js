@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
-const postSchema = new mongoose.Schema({
+const channelSchema = new mongoose.Schema({
     title: String,
+    addr:String,
     desc: String,
     created: Date
 });
@@ -12,6 +13,6 @@ const postSchema = new mongoose.Schema({
 //     console.log(greeting);
 // };
 
-const Post = mongoose.model('Post', postSchema);
-exports.Post = Post
+const Channel = mongoose.model('Channel', channelSchema);
+exports.Channel = Channel
 
