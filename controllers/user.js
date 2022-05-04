@@ -11,7 +11,7 @@ exports.create = async (req, res) => {
         await User.create(req.body)
         return res.json({})
     } catch (err) {
-        res.status(400).json({ err: 'email already exists' })
+        res.status(400).json({ err })
     }
 
 }
