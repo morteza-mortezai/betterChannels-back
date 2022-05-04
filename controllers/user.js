@@ -11,7 +11,9 @@ exports.create = async (req, res) => {
         await User.create(req.body)
         return res.end()
     } catch (err) {
-        res.status(400).json({ err })
+        const errors = []
+        errors = err.errors
+        res.status(400).json({  errors })
     }
 
 }
