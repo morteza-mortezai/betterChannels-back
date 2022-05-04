@@ -14,7 +14,7 @@ exports.create = async (req, res) => {
         await User.create(req.body)
         return res.json({})
     } catch (err) {
-        res.json({ err })
+        res.status(403).json({ err })
     }
 
 }
