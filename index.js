@@ -4,6 +4,8 @@ const app=express()
 require('./config/db')
 // routes
 app.use('/channel',require('./routes/index'))
+app.use('/user',require('./routes/user'))
+
 app.use(express.json())
 const port = process.env.NODE_ENV === 'production' ? (process.env.PORT || 80) : 5000;
 app.listen(port,()=>{

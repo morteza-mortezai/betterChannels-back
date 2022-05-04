@@ -14,7 +14,8 @@
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "mongoose": "^6.3.1",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "yup": "^0.32.11"
   },
   "engines": {
     "node": "16.14.2"

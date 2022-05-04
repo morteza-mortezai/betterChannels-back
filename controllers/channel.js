@@ -1,4 +1,4 @@
-const { Channel } = require('../models/post')
+const { Channel } = require('../models/channel')
 
 exports.get = async (req, res) => {
     const channel = await Channel.find()
