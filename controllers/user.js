@@ -1,9 +1,6 @@
 const { User } = require('../models/user')
 
 exports.create = async (req, res) => {
-    // 1. validate
-    // 2. check if email exist
-    // 3. create
     try {
         const { email } = req.body
         const user = await User.findOne({ email })

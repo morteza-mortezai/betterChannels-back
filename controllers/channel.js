@@ -6,14 +6,13 @@ exports.get = async (req, res) => {
 }
 
 exports.getById = async (req, res) => {
-    const id=req.params.id
+    const id = req.params.id
     const channel = await Channel.findById(id)
     res.send(channel)
 }
 
 exports.create = async (req, res) => {
-    const p = req.params
-    console.log('recieved data' + p)
+    const p = req.body
     const channel = new Channel(p);
     await channel.save();
     res.json(channel)
