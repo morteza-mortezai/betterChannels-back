@@ -3,7 +3,8 @@ const channelSchema = new mongoose.Schema({
     title: String,
     addr:String,
     desc: String,
-    created: Date
+    created: Date,
+    tags:String
 });
 
 // kittySchema.methods.speak = function speak() {
