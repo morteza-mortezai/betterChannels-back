@@ -5,7 +5,7 @@ exports.create = async (req, res) => {
         const { email } = req.body
         const user = await User.findOne({ email })
         if (user) {
-            return res.status(400).json({ err: 'این ایمیل وجود دارد' })
+            return res.status(400).json({ errors: ['این ایمیل وجود دارد'] })
         }
         await User.userValidation(req.body)
         await User.create(req.body)
@@ -13,7 +13,7 @@ exports.create = async (req, res) => {
     } catch (err) {
         const errors = []
         errors = err.errors
-        res.status(400).json({  errors })
+        res.status(400).json({ errors })
     }
 
 }
