@@ -12,6 +12,7 @@ exports.create = async (req, res) => {
         }
         await User.userValidation(req.body)
         const new_user = await User.create(req.body)
+        res.json({data:'salam'})
         return res.json(new_user)
     } catch (err) {
         res.json(err)

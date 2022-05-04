@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { schema } = require('./secure/userRegValidation')
+//model
 const userSchema = new mongoose.Schema({
     email: {
         required:true,
