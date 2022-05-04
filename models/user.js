@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
     }
 });
 // static validation
-userSchema.static.userValidation = function (body) {
+userSchema.statics.userValidation = function (body) {
     return schema.validate(body, { abortEarly: false })
 }
 
