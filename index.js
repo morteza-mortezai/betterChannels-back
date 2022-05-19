@@ -1,8 +1,8 @@
 const express = require('express')
-const {errorHandler}=require('./middlewares/errors')
+const { errorHandler } = require('./middlewares/errors')
 const bodyParser = require('body-parser');
 const session = require("express-session");
-const {setHeaders}=require('./middlewares/header')
+const { setHeaders } = require('./middlewares/header')
 // connect db
 require('./config/db')
 
