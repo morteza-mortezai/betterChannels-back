@@ -16,7 +16,7 @@ exports.create = async (req, res, next) => {
         //hash
         const hash = await bcrypt.hash(password, 10)
         // create
-        const createdUser=await User.create(
+        const createdUser = await User.create(
             {
                 email, fullName, password: hash
             }
@@ -25,13 +25,15 @@ exports.create = async (req, res, next) => {
         const token = jwt.sign({ userId: createdUser._id }, process.env.JWT_SECRET)
         const link = `http://localhost:5000/user/verify?token=${token}`
 
-        sendEmail(email, fullName, "تایید حساب کاربری در pinia", `
+        sendEmail(email, fullName, "تایید حساب کاربری  ", `
         با سلام
+        <br>
         برای تایید آدرس ایمیل روی لینک زیر کلیک کنید
+        <br>
         ${link}
         `)
 
-        return res.status(200).json({ message: "ایمیل تایید با موفقیت ارسال شد" })
+        return res.status(200).json({ message: "ایمیل تایید با موفقیت ارسال شد", user: { token, fullName: createdUser.fullName } })
     } catch (err) {
         next(err)
     }
@@ -63,4 +65,21 @@ exports.handleLogin = async (req, res, next) => {
         next(err)
     }
 
-};
+}
+
+exports.verify = async (req, res, next) => {
+
+    const { token } = req.query
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
+    const { userId } = decodedToken
+    console.log('userID ', userId)
+    try {
+        const user = await User.findOne({ _id: userId })
+        user.active = true
+        await user.save()
+        res.json({ message: 'ایمیل شما با موفقیت تایید شد' })
+    } catch (err) {
+        next(err)
+    }
+
+}
