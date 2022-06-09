@@ -14,8 +14,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(setHeaders);
 
 // routes
-app.use('/channel', require('./routes/index'))
+app.use('/channel', require('./routes/media'))
 app.use('/user', require('./routes/user'))
+app.use('/offer', require('./routes/offer'))
 
 // handle errors
 app.use(errorHandler)
