@@ -2,7 +2,7 @@ const { Media } = require('../models/media')
 
 exports.get = async (req, res, next) => {
     try {
-        const channel = await Media.find()
+        const channel = await Media.find().populate('userId')
         res.send(channel)
     } catch (err) { next(err) }
 }
