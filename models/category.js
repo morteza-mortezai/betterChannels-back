@@ -6,7 +6,7 @@ const catSchema = new mongoose.Schema({
     title: { type: String, required: true },
 });
 // static validation
-offerSchema.statics.newCategoryValidation = function (body) {
+catSchema.statics.newCategoryValidation = function (body) {
     return schema.validate(body, { abortEarly: false })
 }
 

@@ -7,15 +7,26 @@ const mediaSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    type: {
+    offer: {
         required: true,
-        type: Number,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Offer'
     },
-    name: {
+    mediaType: {
+        required: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'MediaType'
+    },
+    title: {
         required: true,
         type: String,
     },
     addr: {
+        required: true,
+        type: String,
+        unique: true
+    },
+    id: {
         required: true,
         type: String,
         unique: true
@@ -25,38 +36,34 @@ const mediaSchema = new mongoose.Schema({
         type: String,
     },
 
-    cats: {
+    cats: [{
         required: true,
-        type: Array
-    },
-    locations: {
-        required: true,
-        type: Array,
-    },
-    p1: {
-        required: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category'
+    }],
+    locations: [{
+        required: false,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Location'
+
+    }],
+
+    visits: {
+        required: false,
         type: Number,
+        default: 0
     },
-    p2: {
+    score: {
         required: true,
-        type: Number,
+        type: String,
+        enum: ['en', 'fa'],
+        default: 'fa'
     },
-    a1: {
-        required: true,
+    lang: {
+        required: false,
         type: Number,
+        default: 0
     },
-    a2: {
-        required: true,
-        type: Number,
-    },
-    a3: {
-        required: true,
-        type: Number,
-    },
-    minOrder: {
-        required: true,
-        type: Number,
-    }
 });
 
 // kittySchema.methods.speak = function speak() {

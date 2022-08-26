@@ -2,41 +2,38 @@ const mongoose = require('mongoose');
 const { schema } = require('./secure/userRegValidation')
 //model
 const offerSchema = new mongoose.Schema({
-    userId: {
-        required: true,
-        type: mongoose.Schema.Types.ObjectId,
-        ref:'User'
-    },
     mediaId: {
         required: true,
         type: mongoose.Schema.Types.ObjectId,
-        ref:'Media'
+        ref: 'Media'
     },
-    type: {
-        type: String, required: true, enum: ['per', 'temp', 'byView'],
-        default: 'normal'
-    },
-    pos: {
-        type: String, required: true, enum: ['lastPost', 'oneToLast', 'normal'],
-        default: 'normal'
-    },
-    dur: {
+    // قیمت به ازای هر 1000 بازدید
+    // توسط خودم در بک محاسبه می شود
+    byVisit: {
         type: Number,
-        default: -1
+        required: true
     },
-    view: {
+    //  میانگین قیمت تبلیغ ساعتی
+    byHour: {
         type: Number,
-        default: -1
+        required: true
     },
+    // جزییات تبلیغ بازدیدی
+    byVisitDetail: {
+        type: String,
+        required: true
+    },
+    // جزیییات تبلیغ ساعتی
+    byHourDetail: {
+        type: String,
+        required: true
+    },
+
     minOrder: {
         type: Number,
         default: -1
     },
-    price: {
-        type: Number,
-        required: true,
-        default: 0
-    }
+
 
 });
 // static validation
