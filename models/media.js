@@ -47,19 +47,46 @@ const mediaSchema = new mongoose.Schema({
         ref: 'Location'
 
     }],
+    mdiaType: {
+        required: false,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'MediaType'
+
+    },
+    contact: {
+        required: false,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Contact'
+
+    },
 
     visits: {
         required: false,
         type: Number,
         default: 0
     },
-    score: {
+    follower: {
+        required: false,
+        type: Number,
+        default: 0
+    },
+    follower: {
+        required: false,
+        type: Number,
+        default: 0
+    },
+    lang: {
         required: true,
         type: String,
         enum: ['en', 'fa'],
         default: 'fa'
     },
-    lang: {
+    score: {
+        required: false,
+        type: Number,
+        default: 0
+    },
+    engRate: {
         required: false,
         type: Number,
         default: 0
