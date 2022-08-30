@@ -1,4 +1,5 @@
 const { Media } = require('../models/media')
+const { Contact } = require('../models/contact')
 
 exports.get = async (req, res, next) => {
     try {
@@ -16,18 +17,21 @@ exports.getById = async (req, res) => {
 exports.create = async (req, res, next) => {
 
     const body = req.body
-    const { addr } = body
+    const { id,mediaType,contact } = body
     body.userId = req.userId
     try {
         // validate
         await Media.newMediaValidation(req.body)
         // avoid duplication
-        const found = await Media.findOne({ addr })
-        if (found) {
+        const found = await Media.findOne({ id })
+        if (found && found.id==id) {
             const error = new Error('این رسانه قبلا ثبت شده است')
             error.statusCode = 400;
             throw error
         }
+// 1. register contact
+const con=new Contact(contact)
+await Contact.save()
 
         const channel = new Media(body);
         await channel.save();

@@ -17,6 +17,7 @@ app.use(setHeaders);
 app.use('/media', require('./routes/media'))
 app.use('/user', require('./routes/user'))
 app.use('/offer', require('./routes/offer'))
+app.use('/location', require('./routes/location'))
 
 // handle errors
 app.use(errorHandler)

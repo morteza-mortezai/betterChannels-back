@@ -8,7 +8,7 @@ const mediaSchema = new mongoose.Schema({
         ref: 'User'
     },
     offer: {
-        required: true,
+        required: false,
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Offer'
     },
@@ -32,7 +32,7 @@ const mediaSchema = new mongoose.Schema({
         unique: true
     },
     desc: {
-        required: true,
+        required: false,
         type: String,
     },
 
@@ -47,14 +47,9 @@ const mediaSchema = new mongoose.Schema({
         ref: 'Location'
 
     }],
-    mdiaType: {
-        required: false,
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'MediaType'
 
-    },
     contact: {
-        required: false,
+        required: true,
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Contact'
 
@@ -70,11 +65,7 @@ const mediaSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    follower: {
-        required: false,
-        type: Number,
-        default: 0
-    },
+
     lang: {
         required: true,
         type: String,
