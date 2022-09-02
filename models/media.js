@@ -38,6 +38,7 @@ const mediaSchema = new mongoose.Schema({
 
     cats: [{
         required: true,
+        // type:String
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category'
     }],

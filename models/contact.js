@@ -3,12 +3,12 @@ const { schema } = require('./secure/contactValidation')
 //model
 const contactSchema = new mongoose.Schema({
 
-    mediaId: {
-        type: String,
-        required: true,
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Media'
-    },
+    // mediaId: {
+    //     type: String,
+    //     required: true,
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Media'
+    // },
     phone: {
         type: String,
 

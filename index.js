@@ -18,6 +18,9 @@ app.use('/media', require('./routes/media'))
 app.use('/user', require('./routes/user'))
 app.use('/offer', require('./routes/offer'))
 app.use('/location', require('./routes/location'))
+app.use('/mediaType', require('./routes/mediaType'))
+app.use('/category', require('./routes/category'))
+app.use('/contact', require('./routes/contact'))
 
 // handle errors
 app.use(errorHandler)
