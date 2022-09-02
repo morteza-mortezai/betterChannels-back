@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
-const { schema } = require('./secure/userRegValidation')
+const { schema } = require('./secure/newOfferValidation')
 //model
 const offerSchema = new mongoose.Schema({
     mediaId: {
-        required: true,
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Media'
+        required: true,
+        ref:'Media'
     },
     // قیمت به ازای هر 1000 بازدید
     // توسط خودم در بک محاسبه می شود
@@ -19,21 +19,19 @@ const offerSchema = new mongoose.Schema({
         required: true
     },
     // جزییات تبلیغ بازدیدی
-    byVisitDetail: {
-        type: String,
-        required: true
-    },
+    // مثلا شامل اینکه {count:100 , cost:10000}
+    byVisitDetail: [
+        { count: { type: Number }, cost: { type: Number } }
+    ],
     // جزیییات تبلیغ ساعتی
-    byHourDetail: {
-        type: String,
-        required: true
-    },
+    byHourDetail: [
+        { hour: { type: Number }, cost: { type: Number } },
+    ],
 
     minOrder: {
         type: Number,
         default: -1
     },
-
 
 });
 // static validation
