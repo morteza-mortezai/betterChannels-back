@@ -16,6 +16,7 @@ exports.create = async (req, res, next) => {
             const error = new Error('برای این رسانه قبلا آفر ثبت شده است .')
             error.statusCode = 400;
             throw error
+            
         }
         // find Media 
         console.log('media id', mediaId)

@@ -21,6 +21,9 @@ app.use('/location', require('./routes/location'))
 app.use('/mediaType', require('./routes/mediaType'))
 app.use('/category', require('./routes/category'))
 app.use('/contact', require('./routes/contact'))
+app.use('/comment', require('./routes/comment'))
+app.use('/order', require('./routes/order'))
+app.use('/orderComment', require('./routes/orderComment'))
 
 // handle errors
 app.use(errorHandler)

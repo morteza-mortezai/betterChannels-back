@@ -1,5 +1,6 @@
 const { Media } = require('../models/media')
 const { Contact } = require('../models/contact')
+const { Comment } = require('../models/comment')
 
 
 exports.get = async (req, res, next) => {
@@ -25,7 +26,13 @@ exports.get = async (req, res, next) => {
 exports.getById = async (req, res) => {
     const _id = req.params.id
     const channel = await Media.findById({ _id })
-    res.send(channel)
+    const comments=await Comment.find({mediaId:_id}).select('-mediaId').populate([
+    {
+        path: 'userId',
+        select: 'fullName',
+    }
+    ])
+    res.send({channel,comments})
 }
 
 exports.update = async (req, res,next) => {
@@ -101,4 +108,3 @@ exports.deleteAll = async (req, res, next) => {
     } catch (err) { next(err) }
 }
 
-// create method should test if it's registered before or not to avoid duplication

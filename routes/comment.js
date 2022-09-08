@@ -6,3 +6,6 @@ const { authenticated } = require("../middlewares/auth");
 router.put('/create',authenticated,comControllers.create)
 
 module.exports=router
+
+
+// لازم نیست احتمالا باید پاک بشه
