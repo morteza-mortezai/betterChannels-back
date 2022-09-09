@@ -24,6 +24,7 @@ app.use('/contact', require('./routes/contact'))
 app.use('/comment', require('./routes/comment'))
 app.use('/order', require('./routes/order'))
 app.use('/orderComment', require('./routes/orderComment'))
+app.use('/rolePermission', require('./routes/rolePermission'))
 
 // handle errors
 app.use(errorHandler)

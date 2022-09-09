@@ -15,6 +15,6 @@ const orderCommentSchema = new mongoose.Schema({
 },{timestamps:true});
 
 
-const OrderComment = mongoose.model('OrderCommentSchema', orderCommentSchema);
+const OrderComment = mongoose.model('OrderComment', orderCommentSchema);
 exports.OrderComment = OrderComment
 

@@ -16,6 +16,7 @@ exports.create = async (req, res, next) => {
         await User.userValidation(req.body)
         //hash
         const hash = await bcrypt.hash(password, 10)
+ 
         // create
         const createdUser = await User.create(
             {
