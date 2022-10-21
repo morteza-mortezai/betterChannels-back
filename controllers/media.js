@@ -4,38 +4,71 @@ const { Comment } = require('../models/comment')
 
 
 exports.get = async (req, res, next) => {
+    const queries = req.query
+    let { vip, cats, title, locations, page, limit,sortBy } = queries
+    if (!limit) limit = 6
+    if (!page) page = 1
+
+    console.log('queries', queries)
+    // add queries
+    const appliedQueries = {}
+    if (vip) appliedQueries['vip'] = vip;
+    if (title) appliedQueries['title'] = { $regex: regex };
+    if (cats) appliedQueries['cats'] = { $in: cats };
+    if (locations) appliedQueries['locations'] = { $in: locations };
+
+    console.log('appliedQueries', appliedQueries)
+
+
+    const regex = new RegExp(title, 'i')
+    // پارامترای اضافی پاک شوند مثلا پیج و تعداد
     try {
-        const channel = await Media.find().populate(['userId', {
+         Media.find(appliedQueries, null).populate([{
+            path: 'userId',
+            select: '_id'
+        }, {
             path: 'contact',
             select:
                 'phone email',
         }, {
-                path: 'mediaType',
-                select:
-                    'name',
-            }, {
-                path: 'cats',
-                select:
-                    'title',
-            }
-        ])
-        res.send(channel)
+            path: 'mediaType',
+            select:
+                'name',
+        }, {
+            path: 'cats',
+            select:
+                'title',
+        }, {
+            path: 'locations',
+            select:
+                'name',
+        }
+        ]).sort(sortBy)
+        //paging
+        .skip(Math.max(0, (page - 1) * limit)).limit(limit)
+        // calculate count
+        .exec(function (err, medium) {
+            Media.count().exec(function (error, count) {
+
+                res.send({ data: medium, page, pages: Math.ceil(count / limit) })
+            })
+        })
     } catch (err) { next(err) }
 }
 
 exports.getById = async (req, res) => {
     const _id = req.params.id
     const channel = await Media.findById({ _id })
-    const comments=await Comment.find({mediaId:_id}).select('-mediaId').populate([
-    {
-        path: 'userId',
-        select: 'fullName',
-    }
+    const comments = await Comment.find({ mediaId: _id }).select('-mediaId').populate([
+        {
+            path: 'userId',
+            select: 'fullName',
+        }
     ])
-    res.send({channel,comments})
+    res.send({ channel, comments })
 }
 
-exports.update = async (req, res,next) => {
+exports.update = async (req, res, next) => {
     try {
         const _id = req.params.id
         const channel = await Media.findById({ _id })
@@ -49,13 +82,13 @@ exports.update = async (req, res,next) => {
         const updated = await channel.save()
         console.log('updated', updated)
         res.send({ message: 'رسانه مورد نظر با موفقیت برزو رسانی شد' })
-    } catch (err) { next(err)}
+    } catch (err) { next(err) }
 }
 
 exports.create = async (req, res, next) => {
 
     const userId = req.userId
-    const { id, mediaType, contact, cats, title, addr } = req.body
+    const { id, mediaType, contact, cats, title, addr, locations } = req.body
     try {
         // validate
         await Media.newMediaValidation(req.body)
@@ -81,7 +114,7 @@ exports.create = async (req, res, next) => {
 
         // const concats = JSON.parse(cats)
         // console.log('cats',cats[0],cats[1])
-        const channel = new Media({ userId, id, mediaType, contact: savedConatact._id, cats, title, addr });
+        const channel = new Media({ userId, id, mediaType, contact: savedConatact._id, cats, title, addr, locations });
         await channel.save();
         res.json({ message: 'کانال با موفقیت ثبت شد' })
     } catch (err) {

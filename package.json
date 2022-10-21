@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index"
+    "start": "node index",
+    "dev": "nodemon ./index.js "
   },
   "keywords": [],
   "author": "",
@@ -20,10 +21,12 @@
     "mongoose": "^6.3.1",
     "node-fetch": "^2.6.7",
     "nodemailer": "^6.7.5",
-    "nodemon": "^2.0.15",
     "yup": "^0.32.11"
   },
   "engines": {
     "node": "16.14.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
   }
 }

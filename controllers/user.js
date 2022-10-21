@@ -44,7 +44,7 @@ exports.create = async (req, res, next) => {
 
 exports.handleLogin = async (req, res, next) => {
     const { email, password} = req.body
-    const token1= req.body.token
+    // const token1= req.body.token
     try {
         // recaptcha token
         // if (!token1) {

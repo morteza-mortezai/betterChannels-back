@@ -83,7 +83,15 @@ const mediaSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-});
+    vip: {
+        required: false,
+        type: Boolean,
+        default: false
+    },
+
+},
+    { timestamps: true }
+);
 
 // kittySchema.methods.speak = function speak() {
 //     const greeting = this.name
