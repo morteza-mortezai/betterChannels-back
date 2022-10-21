@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { schema } = require('./secure/userRegValidation')
+const { schema } = require('./secure/user/userReg')
 //model
 const mediaTypeSchema = new mongoose.Schema({
     name: {

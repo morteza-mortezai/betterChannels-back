@@ -13,7 +13,7 @@ exports.create = async (req, res, next) => {
             return res.status(400).json({ errors: ['این ایمیل وجود دارد'] })
         }
         // validate
-        await User.userValidation(req.body)
+        await User.userRegValidation(req.body)
         //hash
         const hash = await bcrypt.hash(password, 10)
  
@@ -43,31 +43,32 @@ exports.create = async (req, res, next) => {
 }
 
 exports.handleLogin = async (req, res, next) => {
-    const { email, password, token } = req.body
-    // recaptcha token
-    if (!token) {
-        const error = new Error({ message: 'recaptcha is not valid' })
-        throw error
-    }
-
-    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${token}&remoteip=${req.connection.remoteAddress}`
-
+    const { email, password} = req.body
+    const token1= req.body.token
     try {
-        // verify recaptcha response
-        const response = await fetch(verifyUrl, {
-            method: "POST",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-            },
-        });
+        // recaptcha token
+        // if (!token1) {
+        //     const error = new Error({ message: 'recaptcha is not valid' })
+        //     throw error
+        // }
+        // await User.userLoginValidation(req.body)
+        
+        // const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${token1}&remoteip=${req.connection.remoteAddress}`
+        // // verify recaptcha response
+        // const response = await fetch(verifyUrl, {
+        //     method: "POST",
+        //     headers: {
+        //         Accept: "application/json",
+        //         "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+        //     },
+        // });
 
-        const json = await response.json();
+        // const json = await response.json();
 
-        if (!json.success) {
-            const error = new Error({ message: 'recaptcha is not valid' })
-            throw error
-        }
+        // if (!json.success) {
+        //     const error = new Error({ message: 'recaptcha is not valid' })
+        //     throw error
+        // }
 
         const user = await User.findOne({ email })
         // not found user

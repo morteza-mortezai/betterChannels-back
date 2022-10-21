@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const { schema } = require('./secure/userRegValidation')
+const { regSchema } = require('./secure/user/userReg')
+const { loginSchema } = require('./secure/user/userLogin')
 //model
 const userSchema = new mongoose.Schema({
     email: {
@@ -25,8 +26,12 @@ const userSchema = new mongoose.Schema({
     }
 });
 // static validation
-userSchema.statics.userValidation = function (body) {
-    return schema.validate(body, { abortEarly: false })
+userSchema.statics.userRegValidation = function (body) {
+    return regSchema.validate(body, { abortEarly: false })
+}
+
+userSchema.statics.userLoginValidation = function (body) {
+    return loginSchema.validate(body, { abortEarly: false })
 }
 
 const User = mongoose.model('User', userSchema);
