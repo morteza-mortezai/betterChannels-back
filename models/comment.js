@@ -12,11 +12,8 @@ const commentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    isBuyer:{
-        type:Boolean,
-        required:true,
-    },
-    text:{
+
+    content:{
         type:String,
         required:true,   
     }

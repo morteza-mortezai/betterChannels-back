@@ -8,8 +8,7 @@ exports.get = async (req, res, next) => {
     let { vip, cats, title, locations, page, limit,sortBy } = queries
     if (!limit) limit = 6
     if (!page) page = 1
-
-    console.log('queries', queries)
+   
     // add queries
     const appliedQueries = {}
     if (vip) appliedQueries['vip'] = vip;
@@ -17,10 +16,7 @@ exports.get = async (req, res, next) => {
     if (cats) appliedQueries['cats'] = { $in: cats };
     if (locations) appliedQueries['locations'] = { $in: locations };
 
-    console.log('appliedQueries', appliedQueries)
-
-
-    const regex = new RegExp(title, 'i')
+      const regex = new RegExp(title, 'i')
     // پارامترای اضافی پاک شوند مثلا پیج و تعداد
     try {
          Media.find(appliedQueries, null).populate([{
