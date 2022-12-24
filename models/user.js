@@ -4,16 +4,21 @@ const { loginSchema } = require('./secure/user/userLogin')
 //model
 const userSchema = new mongoose.Schema({
     email: {
-        required:true,
+        required: false,
         type: String,
         unique: true
     },
-    fullName: { type: String, required: true, default: null },
-    phone: { type: String, required: false, default: null },
-    active: {
+    fullName: { type: String, required: false },
+    phone: { type: String, required: false, unique: true },
+    isVerified: {
         type: Boolean,
         required: false,
         default: false
+    },
+    active: {
+        type: Boolean,
+        required: false,
+        default: true
     },
     password: {
         type: String,
@@ -21,7 +26,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        default:'USER',
+        default: 'USER',
         required: false
     }
 });

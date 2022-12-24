@@ -1,10 +1,10 @@
-const { OrderComment } = require('../models/orderComment')
+// const { OrderComment } = require('../models/orderComment')
 
 exports.getByOrderId = async (req, res, next) => {
     const {orderId}=req.params
     try {
-        const comments =await OrderComment.find({orderId}).select('-mediaId -orderId -updatedAt -_id -__v')
-        res.json({comments})
+        // const comments =await OrderComment.find({orderId}).select('-mediaId -orderId -updatedAt -_id -__v')
+        // res.json({comments})
     } catch (err) {
         next(err)
     }
