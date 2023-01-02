@@ -1,11 +1,13 @@
 exports.rp = {
     'SUPERADMIN': [
-        { '/order/all': 'GET' },
+        { path: '/order/all', method: 'GET' },
     ],
     'USER': [
-        { '/order/all': 'GET' },
-        { '/media/create': 'POST' },
-        { '/category/create': 'POST' },
-        { '/location': 'POST' },
+        { path: '/order/all', method: 'GET' },
+        { path: '/media/create', method: 'POST' },
+        { path: '/category/create', method: 'POST' },
+        { path: '/location', method: 'POST' },
+        { path: '/location', method: 'POST' },
+        { path: '/api/user/info', method: 'GET' },
     ]
 }

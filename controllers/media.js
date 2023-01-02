@@ -84,13 +84,13 @@ exports.update = async (req, res, next) => {
 exports.create = async (req, res, next) => {
 
     const userId = req.userId
-    const { id, mediaType, contact, cats, title, addr, locations } = req.body
+    const { link, mediaType, contact, cats, title, addr, locations } = req.body
     try {
         // validate
         await Media.newMediaValidation(req.body)
         // avoid duplication
-        const found = await Media.findOne({ id })
-        if (found && found.id == id) {
+        const found = await Media.findOne({ addr })
+        if (found && found.addr == addr) {
             const error = new Error('این رسانه قبلا ثبت شده است')
             error.statusCode = 400;
             throw error
@@ -110,7 +110,7 @@ exports.create = async (req, res, next) => {
 
         // const concats = JSON.parse(cats)
         // console.log('cats',cats[0],cats[1])
-        const channel = new Media({ userId, id, mediaType, contact: savedConatact._id, cats, title, addr, locations });
+        const channel = new Media({ userId, addr, mediaType, contact: savedConatact._id, cats, title, link, locations });
         await channel.save();
         res.json({ message: 'کانال با موفقیت ثبت شد' })
     } catch (err) {

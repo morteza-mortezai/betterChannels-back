@@ -37,7 +37,6 @@ exports.get = async (req, res, next) => {
 
 
 exports.create = async (req, res, next) => {
-
     const body = req.body
    
     // body.userId = req.userId

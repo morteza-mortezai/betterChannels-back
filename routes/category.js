@@ -4,6 +4,6 @@ const router = new Router();
 const { authenticated } = require("../middlewares/auth");
 
 router.get('/',  categoryControllers.get)
-router.post('/create', authenticated, categoryControllers.create)
+router.post('/', authenticated, categoryControllers.create)
 
 module.exports = router

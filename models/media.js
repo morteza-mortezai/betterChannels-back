@@ -22,12 +22,12 @@ const mediaSchema = new mongoose.Schema(
             required: true,
             type: String,
         },
-        addr: {
+        link: {
             required: true,
             type: String,
             unique: true
         },
-        id: {
+        addr: {
             required: true,
             type: String,
             unique: true
@@ -36,7 +36,6 @@ const mediaSchema = new mongoose.Schema(
             required: false,
             type: String,
         },
-
         cats: [{
             required: true,
             // type:String

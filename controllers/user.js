@@ -79,10 +79,10 @@ exports.register = async (req, res, next) => {
     }
 }
 // ok
-exports.handleLogin = async (req, res, next) => {
-    const { emailPhone, password } = req.body
-    // const token1= req.body.token
+exports.login = async (req, res, next) => {
     try {
+        const { emailPhone, password } = req.body
+        // const token1= req.body.token
         // recaptcha token
         // if (!token1) {
         //     const error = new Error({ message: 'recaptcha is not valid' })
@@ -125,13 +125,13 @@ exports.handleLogin = async (req, res, next) => {
         const isEquel = bcrypt.compare(password, user.password)
         if (!isEquel) {
             const error = new Error('نام کاربری یا کلمه عبور اشتباه است')
-            error.statusCode = 404;
+            error.statusCode = 401;
             throw error
         }
         // check user is verified or not
         if (!user.isVerified) {
             const error = new Error('لطفا حساب کاربری خود را تایید کنید')
-            error.statusCode = 401;
+            error.statusCode = 400;
             throw error
         }
         // produce token
@@ -144,10 +144,10 @@ exports.handleLogin = async (req, res, next) => {
 
 }
 exports.userInfo = async (req, res, next) => {
-    const userId = req.userId
+    const _id = req.userId
     try {
         // find user
-        let user = await User.findOne({ _id: userId })
+        let user = await User.findOne({ _id })
         // not found user
         if (!user) {
             const error = new Error('کاربر مورد نظر یافت نشد')
@@ -167,9 +167,8 @@ exports.userInfo = async (req, res, next) => {
     }
 
 }
-// ok  // توکن ارسال شوو
-// میشد تاریخ انقضا هم برای توکن در نظر گرفت
-// و در میدل ور اگر اختلاف زیاد بود آنرا باطل دانست
+// ok 
+// شاید میشد ایمیبل رو از سشن گرفت 
 exports.verify = async (req, res, next) => {
     const { emailPhone, code } = req.body
     // const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
@@ -236,8 +235,11 @@ exports.verify = async (req, res, next) => {
 
 }
 // ok
-exports.resend = async (req, res, next) => {
+// شاید میشد اینجا ایمیل رو از سشن یبگیرم 
+// مرحله ثبت نام میشد ایمیل رو در سشن ذخیره کرده
+exports.newCode = async (req, res, next) => {
     // میشد چک کرد آیا چنین کاربری در دیتابیس هست یا نه
+    const { emailPhone } = req.body
     try {
         // find user
         let user = await User.findOne({
@@ -253,7 +255,7 @@ exports.resend = async (req, res, next) => {
             error.statusCode = 404;
             throw error
         }
-        const { emailPhone } = req.body
+
         await Verification.deleteMany({ emailPhone })
         const randomNumber = (Math.random() * 1000000).toString().substring(0, 6)
         await Verification.create({ emailPhone, randomNumber })
