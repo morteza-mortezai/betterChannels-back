@@ -1,3 +1,5 @@
+// احتمالا دیگه لازم نباشه چون شماره قرار کنار خود مدیا ثبت بشه
+
 const mongoose = require('mongoose');
 const { schema } = require('./secure/contactValidation')
 //model

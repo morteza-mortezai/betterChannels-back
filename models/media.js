@@ -49,13 +49,16 @@ const mediaSchema = new mongoose.Schema(
 
         }],
 
-        contact: {
+        // contact: {
+        //     required: true,
+        //     type: mongoose.Schema.Types.ObjectId,
+        //     ref: 'Contact'
+
+        // },
+        contact: [{
             required: true,
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Contact'
-
-        },
-
+            type: {cType:String,value:String},
+        }],
         visits: {
             required: false,
             type: Number,

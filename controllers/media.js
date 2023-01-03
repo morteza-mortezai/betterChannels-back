@@ -80,11 +80,12 @@ exports.update = async (req, res, next) => {
         res.send({ message: 'رسانه مورد نظر با موفقیت برزو رسانی شد' })
     } catch (err) { next(err) }
 }
-
+// contact changed
+// now must be like [{cType:1,value:'@myId'}]
 exports.create = async (req, res, next) => {
 
     const userId = req.userId
-    const { link, mediaType, contact, cats, title, addr, locations } = req.body
+    const { link, mediaType, contact, cats, title, addr, locations,follower,desc } = req.body
     try {
         // validate
         await Media.newMediaValidation(req.body)
@@ -94,23 +95,23 @@ exports.create = async (req, res, next) => {
             const error = new Error('این رسانه قبلا ثبت شده است')
             error.statusCode = 400;
             throw error
-        }
+        } 
         // 1. register contact
         // JSON.parse(contact)
 
         // const conContact=JSON.parse(contact)
-        const conContact = contact
+        // const conContact = contact
         // console.log('contact1',typeof contact)
         // console.log('contact2', contact)
-        const con = new Contact({ ...conContact })
-        const savedConatact = await con.save()
+        // const con = new Contact({ ...conContact })
+        // const savedConatact = await con.save()
         // console.log('savedConatact', savedConatact)
         // console.log('res', res)
         // body.contact = savedConatact._id
 
         // const concats = JSON.parse(cats)
         // console.log('cats',cats[0],cats[1])
-        const channel = new Media({ userId, addr, mediaType, contact: savedConatact._id, cats, title, link, locations });
+        const channel = new Media({ userId, addr, mediaType, contact, cats, title, link, locations,follower,desc  });
         await channel.save();
         res.json({ message: 'کانال با موفقیت ثبت شد' })
     } catch (err) {
