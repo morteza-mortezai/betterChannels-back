@@ -1,14 +1,13 @@
 const { Media } = require('../models/media')
-const { Contact } = require('../models/contact')
 const { Comment } = require('../models/comment')
 
 
 exports.get = async (req, res, next) => {
     const queries = req.query
-    let { vip, cats, title, locations, page, limit,sortBy } = queries
+    let { vip, cats, title, locations, page, limit, sortBy } = queries
     if (!limit) limit = 6
     if (!page) page = 1
-   
+
     // add queries
     const appliedQueries = {}
     if (vip) appliedQueries['vip'] = vip;
@@ -16,10 +15,10 @@ exports.get = async (req, res, next) => {
     if (cats) appliedQueries['cats'] = { $in: cats };
     if (locations) appliedQueries['locations'] = { $in: locations };
 
-      const regex = new RegExp(title, 'i')
+    const regex = new RegExp(title, 'i')
     // پارامترای اضافی پاک شوند مثلا پیج و تعداد
     try {
-         Media.find(appliedQueries, null).populate([{
+        Media.find(appliedQueries, null).populate([{
             path: 'userId',
             select: '_id'
         }, {
@@ -40,15 +39,15 @@ exports.get = async (req, res, next) => {
                 'name',
         }
         ]).sort(sortBy)
-        //paging
-        .skip(Math.max(0, (page - 1) * limit)).limit(limit)
-        // calculate count
-        .exec(function (err, medium) {
-            Media.count().exec(function (error, count) {
+            //paging
+            .skip(Math.max(0, (page - 1) * limit)).limit(limit)
+            // calculate count
+            .exec(function (err, medium) {
+                Media.count().exec(function (error, count) {
 
-                res.send({ data: medium, page, pages: Math.ceil(count / limit) })
+                    res.send({ data: medium, page, pages: Math.ceil(count / limit) })
+                })
             })
-        })
     } catch (err) { next(err) }
 }
 
@@ -85,7 +84,7 @@ exports.update = async (req, res, next) => {
 exports.create = async (req, res, next) => {
 
     const userId = req.userId
-    const { link, mediaType, contact, cats, title, addr, locations,follower,desc } = req.body
+    const { link, mediaType, contact, cats, title, addr, locations, follower, desc } = req.body
     try {
         // validate
         await Media.newMediaValidation(req.body)
@@ -95,7 +94,7 @@ exports.create = async (req, res, next) => {
             const error = new Error('این رسانه قبلا ثبت شده است')
             error.statusCode = 400;
             throw error
-        } 
+        }
         // 1. register contact
         // JSON.parse(contact)
 
@@ -111,7 +110,7 @@ exports.create = async (req, res, next) => {
 
         // const concats = JSON.parse(cats)
         // console.log('cats',cats[0],cats[1])
-        const channel = new Media({ userId, addr, mediaType, contact, cats, title, link, locations,follower,desc  });
+        const channel = new Media({ userId, addr, mediaType, contact, cats, title, link, locations, follower, desc });
         await channel.save();
         res.json({ message: 'کانال با موفقیت ثبت شد' })
     } catch (err) {

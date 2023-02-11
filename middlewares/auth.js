@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 const { User } = require('../models/user')
 // const {RPP} =require('../models/RPP')
 // const {Path} =require('../models/path')
-const { RolePermission } = require('../models/rolePermission')
 const { rp } = require('../utils/role-permission')
 exports.authenticated = async (req, res, next) => {
 
