@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 //model
 const verificationSchema = new mongoose.Schema({
-    emailPhone: {
+    email: {
         required: true,
         type: String,
         unique: true

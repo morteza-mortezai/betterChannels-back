@@ -4,12 +4,12 @@ const { loginSchema } = require('./secure/user/userLogin')
 //model
 const userSchema = new mongoose.Schema({
     email: {
-        required: false,
+        required: true,
         type: String,
         unique: true
     },
-    fullName: { type: String, required: false },
-    phone: { type: String, required: false, unique: true },
+    fullName: { type: String, required: true },
+    phone: { type: String, required: false, unique: false },
     isVerified: {
         type: Boolean,
         required: false,
@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
     active: {
         type: Boolean,
         required: false,
-        default: true
+        default: false
     },
     password: {
         type: String,
