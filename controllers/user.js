@@ -1,74 +1,83 @@
 const { User } = require('../models/user')
+const { Verification } = require('../models/verification')
 var bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 const fetch = require('node-fetch')
 const { sendEmail } = require('../utils/mailer')
-
-exports.create = async (req, res, next) => {
+// ok2
+exports.register = async (req, res, next) => {
     try {
         const { email, password, fullName } = req.body
-        // find user
-        const user = await User.findOne({ email })
-        if (user) {
-            return res.status(400).json({ errors: ['این ایمیل وجود دارد'] })
-        }
         // validate
-        await User.userValidation(req.body)
+        await User.userRegValidation(req.body)
+        // find user
+        let user = await User.findOne({ email })
+        if (user && user.isVerified) {
+            return res.status(400).json({ errors: ['این ایمیل  قبلا ثبت نام کرده'] })
+        }
         //hash
         const hash = await bcrypt.hash(password, 10)
-        // create
-        const createdUser = await User.create(
-            {
-                email, fullName, password: hash
-            }
-        )
 
-        const token = jwt.sign({ userId: createdUser._id }, process.env.JWT_SECRET)
-        const link = `${process.env.DOMAIN_URL}verify?token=${token}`
+        // create if user doesnt exist 
+        if (!user) {
+            user = await User.create({ email, fullName, password: hash })
+        }
+        // کد 6 رقمی بسازیم
+        const randomNumber = (Math.random() * 1000000).toString().substring(0, 6)
+        // در دیتا بیس بزاریم
+        // اگه .جود داره قبلی باید پاک بشه
+        // find verif
+        await Verification.deleteMany({ email })
+        await Verification.create({ email, randomNumber })
+        // اینچا چک کنیم اگه عملیات قبلی اوکی نبود عملیات فعلی هم لفو بشه
+        // اگخ دومی ارور داد اولی پاک بشه
+        // ارسال کنیم
+        //بر حسب ایمیل یا فون
 
-        sendEmail(email, fullName, "تایید حساب کاربری  ", `
-        با سلام
-        <br>
-        برای تایید آدرس ایمیل روی لینک زیر کلیک کنید
-        <br>
-        ${link}
-        `)
+        sendEmail(email, fullName, "کد تایید حساب کاربری  ", `
+            با سلام
+            <br>
+            کد تایید
+            <br>
+            ${randomNumber}
+            `)
 
-        return res.status(200).json({ message: "ایمیل تایید با موفقیت ارسال شد", user: { token, fullName: createdUser.fullName } })
+        return res.status(200).json({ message: "کد تایید با موفقیت ارسال شد" })
     } catch (err) {
         next(err)
     }
-
 }
-
-exports.handleLogin = async (req, res, next) => {
-    const { email, password, token } = req.body
-    // recaptcha token
-    if (!token) {
-        const error = new Error({ message: 'recaptcha is not valid' })
-        throw error
-    }
-
-    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${token}&remoteip=${req.connection.remoteAddress}`
-
+// ok2
+exports.login = async (req, res, next) => {
     try {
-        // verify recaptcha response
-        const response = await fetch(verifyUrl, {
-            method: "POST",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-            },
-        });
+        const { email, password } = req.body
+        // const token1= req.body.token
+        // recaptcha token
+        // if (!token1) {
+        //     const error = new Error({ message: 'recaptcha is not valid' })
+        //     throw error
+        // }
+        // await User.userLoginValidation(req.body)
 
-        const json = await response.json();
+        // const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${token1}&remoteip=${req.connection.remoteAddress}`
+        // // verify recaptcha response
+        // const response = await fetch(verifyUrl, {
+        //     method: "POST",
+        //     headers: {
+        //         Accept: "application/json",
+        //         "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+        //     },
+        // });
 
-        if (!json.success) {
-            const error = new Error({ message: 'recaptcha is not valid' })
-            throw error
-        }
+        // const json = await response.json();
 
-        const user = await User.findOne({ email })
+        // if (!json.success) {
+        //     const error = new Error( 'recaptcha is not valid' )
+        // error.statusCode=400
+        //     throw error
+        // }
+        // find user
+        let user = await User.findOne({ email })
         // not found user
         if (!user) {
             const error = new Error('کاربر مورد نظر یافت نشد')
@@ -79,66 +88,164 @@ exports.handleLogin = async (req, res, next) => {
         const isEquel = bcrypt.compare(password, user.password)
         if (!isEquel) {
             const error = new Error('نام کاربری یا کلمه عبور اشتباه است')
-            error.statusCode = 404;
+            error.statusCode = 401;
+            throw error
+        }
+        // check user is verified or not
+        if (!user.isVerified) {
+            const error = new Error('لطفا حساب کاربری خود را تایید کنید')
+            error.statusCode = 400;
             throw error
         }
         // produce token
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET)
-        res.status(201).json({ token, fullName: user.fullName })
+        res.status(201).json({ token })
 
     } catch (err) {
         next(err)
     }
 
 }
-
-exports.verify = async (req, res, next) => {
-
-    const { token } = req.body
-
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
-
-    const { userId } = decodedToken
-
-
+exports.userInfo = async (req, res, next) => {
+    const _id = req.userId
     try {
-        const user = await User.findOne({ _id: userId })
-        user.active = true
-        await user.save()
-        res.json({ message: 'ایمیل شما با موفقیت تایید شد' })
-    } catch (err) {
-        next(err)
-    }
-
-}
-
-exports.forgetPass = async (req, res, next) => {
-    const { email, token } = req.body
-
-    // recaptcha token
-    if (!token) {
-        const error = new Error({ message: 'recaptcha is not valid' })
-        throw error
-    }
-
-    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${token}&remoteip=${req.connection.remoteAddress}`
-
-    try {
-        // verify recaptcha response
-        const response = await fetch(verifyUrl, {
-            method: "POST",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-            },
-        });
-
-        const json = await response.json();
-
-        if (!json.success) {
-            const error = new Error({ message: 'recaptcha is not valid' })
+        // find user
+        let user = await User.findOne({ _id })
+        // not found user
+        if (!user) {
+            const error = new Error('کاربر مورد نظر یافت نشد')
+            error.statusCode = 404;
             throw error
         }
+        // check user is verified or not
+        if (!user.isVerified) {
+            const error = new Error('لطفا حساب کاربری خود را تایید کنید')
+            error.statusCode = 401;
+            throw error
+        }
+        res.status(201).json({ user })
+    } catch (err) {
+        next(err)
+    }
+
+}
+// ok 2
+// شاید میشد ایمیبل رو از سشن گرفت 
+exports.verify = async (req, res, next) => {
+    const { email, code } = req.body
+    // const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
+    // const { userId } = decodedToken
+    // بگردیم پیدا کنیم
+    // اگه نبود ارور بدیم
+    // اگه بود مقایسه کنیم با کد ارسالی 
+    // اگه برابر نبود خطا بدیم
+    // اگه برابر بود 
+    // کاربر رو آپدیت کنیم
+    try {
+        // find user
+        let user = await User.findOne({ email })
+
+        if (!user) {
+            const error = new Error('چنین کاربری وجود ندارد .')
+            error.statusCode = 404;
+            throw error
+        }
+
+        if (user && user.isVerified) {
+            const error = new Error('این کاربر قبلا تایید شده است .')
+            error.statusCode = 400;
+            throw error
+        }
+
+        const verification = await Verification.findOne({ email })
+        if (!verification) {
+            const error = new Error('کد ارسالی منقضی شده لطفا درخواست کد جدید کنید .')
+            error.statusCode = 400;
+            throw error
+        }
+
+        if (verification.randomNumber !== code) {
+            const error = new Error('کد وارد شده اشتباه است لطفا مجددا امتحان کنید .')
+            error.statusCode = 400;
+            throw error
+        }
+        // توکن هم ارسال شود
+        user.isVerified = true
+        await user.save()
+
+        let msg = 'ایمیل شما با موفقیت تایید شد'
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET)
+        res.status(201).json({ token, msg })
+
+    } catch (err) {
+        next(err)
+    }
+
+}
+// ok 2
+// شاید میشد اینجا ایمیل رو از سشن یبگیرم 
+// مرحله ثبت نام میشد ایمیل رو در سشن ذخیره کرده
+exports.newCode = async (req, res, next) => {
+    // میشد چک کرد آیا چنین کاربری در دیتابیس هست یا نه
+    const { email } = req.body
+    try {
+        // find user
+        let user = await User.findOne({ email })
+
+        if (!user) {
+            const error = new Error('چنین کاربری وجود ندارد .')
+            error.statusCode = 404;
+            throw error
+        }
+
+        await Verification.deleteMany({ email })
+        const randomNumber = (Math.random() * 1000000).toString().substring(0, 6)
+        await Verification.create({ email, randomNumber })
+
+        sendEmail(email, '', "کد تایید حساب کاربری  ", `
+            با سلام
+            <br>
+            کد تایید
+            <br>
+            ${randomNumber}
+            `)
+
+        res.json({ message: 'کد تایید با موفقیت ارسال شد' })
+    } catch (err) {
+        next(err)
+    }
+}
+// ریفکتور لازم
+exports.forgetPass = async (req, res, next) => {
+
+
+    try {
+        const { email
+            // , token 
+        } = req.body
+        // recaptcha token
+        // if (!token) {
+        //     const error = new Error('recaptcha is not valid')
+        //     error.statusCode = 400
+        //     throw error
+        // }
+        // const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${token}&remoteip=${req.connection.remoteAddress}`
+
+        // // verify recaptcha response
+        // const response = await fetch(verifyUrl, {
+        //     method: "POST",
+        //     headers: {
+        //         Accept: "application/json",
+        //         "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+        //     },
+        // });
+
+        // const json = await response.json();
+
+        // if (!json.success) {
+        //     const error = new Error('recaptcha is not valid')
+        //     throw error
+        // }
 
         const user = await User.findOne({ email })
         // not found user
@@ -151,9 +258,9 @@ exports.forgetPass = async (req, res, next) => {
         const timeStamp = Date.now()
 
         // produce token with timestamp
-        const token = jwt.sign({ userId: user._id, timeStamp }, process.env.JWT_SECRET)
+        const token1 = jwt.sign({ userId: user._id, timeStamp }, process.env.JWT_SECRET)
 
-        const link = `${process.env.DOMAIN_URL}resetPass?token=${token}`
+        const link = `${process.env.DOMAIN_URL}resetPass?token=${token1}`
 
         sendEmail(user.email, user.fullName, "بازیابی رمز عبور", `
         با سلام
@@ -170,29 +277,32 @@ exports.forgetPass = async (req, res, next) => {
     }
 
 }
-
+// کد هم باید بگیره و
+// اگه یکسان نبود ارور بده
+// لازم نیست توکن بگیره
 exports.resetPass = async (req, res, next) => {
     const { token, password, resetToken } = req.body
-console.log('token for google',token)
+    console.log('token for google', token)
     try {
 
         // 1. verify recaptcha response
 
-        const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${token}&remoteip=${req.connection.remoteAddress}`
-        console.log('verifyUrl', verifyUrl)
-        const response = await fetch(verifyUrl, {
-            method: "POST",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-            },
-        });
-        const json = await response.json();
-        if (!json.success) {
-            console.log('response2', json)
-            const error = new Error({ message: 'recaptcha is not valid' })
-            throw error
-        }
+        // const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${token}&remoteip=${req.connection.remoteAddress}`
+        // console.log('verifyUrl', verifyUrl)
+        // const response = await fetch(verifyUrl, {
+        //     method: "POST",
+        //     headers: {
+        //         Accept: "application/json",
+        //         "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+        //     },
+        // });
+        // const json = await response.json();
+        // if (!json.success) {
+        //     console.log('response2', json)
+        //     const error = new Error('recaptcha is not valid')
+        //     error.statusCode = 400
+        //     throw error
+        // }
 
         // 2. find user and change password
         const nowTimeStamp = Date.now()
@@ -200,7 +310,8 @@ console.log('token for google',token)
         const { userId, timeStamp } = decodedToken
         console.log(' userId, timeStamp', userId, timeStamp)
         if (nowTimeStamp - timeStamp > 15 * 60 * 6000) {
-            const error = new Error({ message: 'لینک ارسال شده متقضی شده لطفا دوباره امتحان کنید .' })
+            const error = new Error('لینک ارسال شده متقضی شده لطفا دوباره امتحان کنید .')
+            error.statusCode = 400
             throw error
         }
         const user = await User.findOne({ _id: userId })
@@ -218,3 +329,5 @@ console.log('token for google',token)
     }
 
 }
+
+// برای تایید شماره همراه یا ایمیل هم تابع لازمه
