@@ -4,7 +4,7 @@ exports.regSchema = Yup.object().shape({
     fullName: Yup.string().required().min(3).max(90),
     email: Yup.string("Enter your Email")
         // .email("Enter a valid email")
-        .required("Email/Phone Number is required")
+        .required("Email Number is required")
         .test('test-name', 'Enter Valid Email',
             function (value) {
                 const emailRegex = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;

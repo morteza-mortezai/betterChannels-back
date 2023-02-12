@@ -4,7 +4,7 @@ var bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 const fetch = require('node-fetch')
 const { sendEmail } = require('../utils/mailer')
-// ok2
+// ok3
 exports.register = async (req, res, next) => {
     try {
         const { email, password, fullName } = req.body
@@ -23,31 +23,26 @@ exports.register = async (req, res, next) => {
             user = await User.create({ email, fullName, password: hash })
         }
         // کد 6 رقمی بسازیم
-        const randomNumber = (Math.random() * 1000000).toString().substring(0, 6)
-        // در دیتا بیس بزاریم
-        // اگه .جود داره قبلی باید پاک بشه
-        // find verif
-        await Verification.deleteMany({ email })
-        await Verification.create({ email, randomNumber })
-        // اینچا چک کنیم اگه عملیات قبلی اوکی نبود عملیات فعلی هم لفو بشه
-        // اگخ دومی ارور داد اولی پاک بشه
-        // ارسال کنیم
-        //بر حسب ایمیل یا فون
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET)
+        await Verification.deleteMany({ userId: user._id })
+        await Verification.create({ userId: user._id, token })
+
+        const link = `${process.env.DOMAIN_URL}verify?token=${token}`
 
         sendEmail(email, fullName, "کد تایید حساب کاربری  ", `
             با سلام
             <br>
             کد تایید
             <br>
-            ${randomNumber}
+            ${link}
             `)
 
-        return res.status(200).json({ message: "کد تایید با موفقیت ارسال شد" })
+        return res.status(200).json({ message: "ثبت نام با موفقیت انجام شد" })
     } catch (err) {
         next(err)
     }
 }
-// ok2
+// ok3
 exports.login = async (req, res, next) => {
     try {
         const { email, password } = req.body
@@ -97,6 +92,12 @@ exports.login = async (req, res, next) => {
             error.statusCode = 400;
             throw error
         }
+        // check user is verified or not
+        if (!user.active) {
+            const error = new Error('حساب کاربری  غیر فعال است لطفا با ادمین تماس بگیرید')
+            error.statusCode = 400;
+            throw error
+        }
         // produce token
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET)
         res.status(201).json({ token })
@@ -130,20 +131,20 @@ exports.userInfo = async (req, res, next) => {
 
 }
 // ok 2
-// شاید میشد ایمیبل رو از سشن گرفت 
+// اینو باید تست کنم
+// ضمن اینکه به فرانت هم شاید احتیاح نباشه
+// *************
 exports.verify = async (req, res, next) => {
-    const { email, code } = req.body
-    // const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
-    // const { userId } = decodedToken
-    // بگردیم پیدا کنیم
-    // اگه نبود ارور بدیم
-    // اگه بود مقایسه کنیم با کد ارسالی 
-    // اگه برابر نبود خطا بدیم
-    // اگه برابر بود 
-    // کاربر رو آپدیت کنیم
+    const { token } = req.body
     try {
+        let v = await Verification.findOne({ token: token })
+        if (!v) {
+            const error = new Error('خطا در تایید ایمیل ، لطفا دوباره ثبا نام کنید')
+            error.statusCode = 400;
+            throw error
+        }
         // find user
-        let user = await User.findOne({ email })
+        let user = await User.findOne({ _id: v.userId })
 
         if (!user) {
             const error = new Error('چنین کاربری وجود ندارد .')
@@ -157,18 +158,6 @@ exports.verify = async (req, res, next) => {
             throw error
         }
 
-        const verification = await Verification.findOne({ email })
-        if (!verification) {
-            const error = new Error('کد ارسالی منقضی شده لطفا درخواست کد جدید کنید .')
-            error.statusCode = 400;
-            throw error
-        }
-
-        if (verification.randomNumber !== code) {
-            const error = new Error('کد وارد شده اشتباه است لطفا مجددا امتحان کنید .')
-            error.statusCode = 400;
-            throw error
-        }
         // توکن هم ارسال شود
         user.isVerified = true
         await user.save()
