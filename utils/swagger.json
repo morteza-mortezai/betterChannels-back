@@ -17,18 +17,6 @@
     "basePath": "/api",
     "tags": [
         {
-            "name": "pet",
-            "description": "Everything about your Pets",
-            "externalDocs": {
-                "description": "Find out more",
-                "url": "http://swagger.io"
-            }
-        },
-        {
-            "name": "store",
-            "description": "Access to Petstore orders"
-        },
-        {
             "name": "user",
             "description": "Operations about user",
             "externalDocs": {
@@ -38,18 +26,17 @@
         }
     ],
     "schemes": [
-        "https",
         "http"
     ],
     "paths": {
         "/user/login": {
             "post": {
                 "tags": [
-                    "pet"
+                    "user"
                 ],
-                "summary": "Add a new pet to the store",
+                "summary": "login",
                 "description": "",
-                "operationId": "addPet",
+                "operationId": "login",
                 "consumes": [
                     "application/json",
                     "application/xml"
@@ -62,7 +49,7 @@
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "Pet object that needs to be added to the store",
+                        "description": "",
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/User"
@@ -87,11 +74,11 @@
         "/user/register": {
             "post": {
                 "tags": [
-                    "pet"
+                    "user"
                 ],
-                "summary": "Add a new pet to the store",
+                "summary": "register",
                 "description": "",
-                "operationId": "addPet",
+                "operationId": "register",
                 "consumes": [
                     "application/json",
                     "application/xml"
@@ -125,12 +112,86 @@
                     }
                 ]
             }
+        },
+        "/user/verify": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "verify",
+                "description": "",
+                "operationId": "verify",
+                "consumes": [
+                    "application/json",
+                    "application/xml"
+                ],
+                "produces": [
+                    "application/json",
+                    "application/xml"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "token",
+                        "description": "Pet object that needs to be added to the store",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Verify"
+                        }
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "security": [
+                    {
+                        "petstore_auth": [
+                            "write:pets",
+                            "read:pets"
+                        ]
+                    }
+                ]
+            }
+        },
+        "/user/info": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "info",
+                "description": "",
+                "operationId": "info",
+                "consumes": [
+                    "application/json",
+                    "application/xml"
+                ],
+                "produces": [
+                    "application/json",
+                    "application/xml"
+                ],
+                "parameters": [],
+                "responses": {
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "security": [
+                    {
+                        "petstore_auth": [
+                            "write:pets",
+                            "read:pets"
+                        ]
+                    }
+                ]
+            }
         }
     },
     "securityDefinitions": {
         "api_key": {
             "type": "apiKey",
-            "name": "api_key",
+            "name": "Authorization",
             "in": "header"
         },
         "petstore_auth": {
@@ -144,6 +205,16 @@
         }
     },
     "definitions": {
+        "security": [
+            {
+                "bearerAuth": {
+                    "type": "apiKey",
+                    "name": "Authorization",
+                    "scheme": "bearer",
+                    "in": "header"
+                }
+            }
+        ],
         "ApiResponse": {
             "type": "object",
             "properties": {
@@ -159,77 +230,6 @@
                 }
             }
         },
-        "Category": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "xml": {
-                "name": "Category"
-            }
-        },
-        "Pet": {
-            "type": "object",
-            "required": [
-                "name",
-                "photoUrls"
-            ],
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "category": {
-                    "$ref": "#/definitions/Category"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "doggie"
-                },
-                "photoUrls": {
-                    "type": "array",
-                    "xml": {
-                        "wrapped": true
-                    },
-                    "items": {
-                        "type": "string",
-                        "xml": {
-                            "name": "photoUrl"
-                        }
-                    }
-                },
-                "tags": {
-                    "type": "array",
-                    "xml": {
-                        "wrapped": true
-                    },
-                    "items": {
-                        "xml": {
-                            "name": "tag"
-                        },
-                        "$ref": "#/definitions/Tag"
-                    }
-                },
-                "status": {
-                    "type": "string",
-                    "description": "pet status in the store",
-                    "enum": [
-                        "available",
-                        "pending",
-                        "sold"
-                    ]
-                }
-            },
-            "xml": {
-                "name": "Pet"
-            }
-        },
         "User": {
             "type": "object",
             "required": [
@@ -238,10 +238,12 @@
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "a@a.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "123456789"
                 }
             },
             "xml": {
@@ -263,6 +265,20 @@
                     "type": "string"
                 },
                 "fullName": {
+                    "type": "string"
+                }
+            },
+            "xml": {
+                "name": "User"
+            }
+        },
+        "Verify": {
+            "type": "object",
+            "required": [
+                "token"
+            ],
+            "properties": {
+                "token": {
                     "type": "string"
                 }
             },

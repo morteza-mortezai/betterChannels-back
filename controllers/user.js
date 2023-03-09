@@ -1,10 +1,13 @@
 const { User } = require('../models/user')
 const { Verification } = require('../models/verification')
+const { ResetPassword } = require('../models/resetPassword')
 var bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 const fetch = require('node-fetch')
 const { sendEmail } = require('../utils/mailer')
-// ok3
+// ok3 // 
+// برای آینده می توان 
+// اجازه لاگین ایمیل های تایید نشده را داد ولی از انطرف آلرت گذاشت
 exports.register = async (req, res, next) => {
     try {
         const { email, password, fullName } = req.body
@@ -22,7 +25,7 @@ exports.register = async (req, res, next) => {
         if (!user) {
             user = await User.create({ email, fullName, password: hash })
         }
-        // کد 6 رقمی بسازیم
+
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET)
         await Verification.deleteMany({ userId: user._id })
         await Verification.create({ userId: user._id, token })
@@ -107,6 +110,7 @@ exports.login = async (req, res, next) => {
     }
 
 }
+
 exports.userInfo = async (req, res, next) => {
     const _id = req.userId
     try {
@@ -130,14 +134,12 @@ exports.userInfo = async (req, res, next) => {
     }
 
 }
-// ok 2
-// اینو باید تست کنم
-// ضمن اینکه به فرانت هم شاید احتیاح نباشه
-// *************
+// ok 3 not tested
+// فعلا فرض بر این اسن که برای اسن قسمت نیاز به فرانت نداریم
 exports.verify = async (req, res, next) => {
-    const { token } = req.body
     try {
-        let v = await Verification.findOne({ token: token })
+        const { token } = req.query
+        let v = await Verification.findOne({ token })
         if (!v) {
             const error = new Error('خطا در تایید ایمیل ، لطفا دوباره ثبا نام کنید')
             error.statusCode = 400;
@@ -158,56 +160,22 @@ exports.verify = async (req, res, next) => {
             throw error
         }
 
-        // توکن هم ارسال شود
         user.isVerified = true
         await user.save()
-
+        // delete verification
+        v.remove()
         let msg = 'ایمیل شما با موفقیت تایید شد'
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET)
-        res.status(201).json({ token, msg })
+        // token
+        const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET)
+        res.status(201).json({ token: accessToken, msg })
 
     } catch (err) {
         next(err)
     }
 
 }
-// ok 2
-// شاید میشد اینجا ایمیل رو از سشن یبگیرم 
-// مرحله ثبت نام میشد ایمیل رو در سشن ذخیره کرده
-exports.newCode = async (req, res, next) => {
-    // میشد چک کرد آیا چنین کاربری در دیتابیس هست یا نه
-    const { email } = req.body
-    try {
-        // find user
-        let user = await User.findOne({ email })
-
-        if (!user) {
-            const error = new Error('چنین کاربری وجود ندارد .')
-            error.statusCode = 404;
-            throw error
-        }
-
-        await Verification.deleteMany({ email })
-        const randomNumber = (Math.random() * 1000000).toString().substring(0, 6)
-        await Verification.create({ email, randomNumber })
-
-        sendEmail(email, '', "کد تایید حساب کاربری  ", `
-            با سلام
-            <br>
-            کد تایید
-            <br>
-            ${randomNumber}
-            `)
-
-        res.json({ message: 'کد تایید با موفقیت ارسال شد' })
-    } catch (err) {
-        next(err)
-    }
-}
-// ریفکتور لازم
+// ok3 not tested
 exports.forgetPass = async (req, res, next) => {
-
-
     try {
         const { email
             // , token 
@@ -247,9 +215,10 @@ exports.forgetPass = async (req, res, next) => {
         const timeStamp = Date.now()
 
         // produce token with timestamp
-        const token1 = jwt.sign({ userId: user._id, timeStamp }, process.env.JWT_SECRET)
-
-        const link = `${process.env.DOMAIN_URL}resetPass?token=${token1}`
+        const token = jwt.sign({ userId: user._id, timeStamp }, process.env.JWT_SECRET)
+        await ResetPassword.deleteMany({ userId: user._id })
+        await ResetPassword.create({ userId: user._id, token })
+        const link = `${process.env.DOMAIN_URL}resetPass?token=${token}`
 
         sendEmail(user.email, user.fullName, "بازیابی رمز عبور", `
         با سلام
@@ -266,12 +235,9 @@ exports.forgetPass = async (req, res, next) => {
     }
 
 }
-// کد هم باید بگیره و
-// اگه یکسان نبود ارور بده
-// لازم نیست توکن بگیره
+// ok3 not tested
 exports.resetPass = async (req, res, next) => {
     const { token, password, resetToken } = req.body
-    console.log('token for google', token)
     try {
 
         // 1. verify recaptcha response
@@ -294,24 +260,25 @@ exports.resetPass = async (req, res, next) => {
         // }
 
         // 2. find user and change password
-        const nowTimeStamp = Date.now()
-        const decodedToken = jwt.verify(resetToken, process.env.JWT_SECRET)
-        const { userId, timeStamp } = decodedToken
-        console.log(' userId, timeStamp', userId, timeStamp)
-        if (nowTimeStamp - timeStamp > 15 * 60 * 6000) {
-            const error = new Error('لینک ارسال شده متقضی شده لطفا دوباره امتحان کنید .')
-            error.statusCode = 400
+        const resetPass = await ResetPassword.findOne({ token: resetToken })
+        if (!resetPass) {
+
+            const error = new Error('لطفا یکبار دیگر کلمه عبور را ریست کنید .')
+            error.statusCode = 400;
+            throw error
+
+        }
+        const user = await User.findOne({ _id: resetPass.userId })
+        if (!user) {
+            const error = new Error('کاربر مورد نظر یافت نشد')
+            error.statusCode = 404;
             throw error
         }
-        const user = await User.findOne({ _id: userId })
-        console.log('user', user)
+
         user.password = password
         await user.save()
 
-        // 3. make new token for login user
-        const token2 = jwt.sign({ userId: user._id }, process.env.JWT_SECRET)
-
-        return res.status(200).json({ message: "کلمه عبور با موفقیت تغییر پیدا کرد .", user: { token: token2, fullName: user.fullName } })
+        return res.status(200).json({ message: "کلمه عبور با موفقیت تغییر پیدا کرد ." })
 
     } catch (err) {
         next(err)
@@ -319,4 +286,3 @@ exports.resetPass = async (req, res, next) => {
 
 }
 
-// برای تایید شماره همراه یا ایمیل هم تابع لازمه

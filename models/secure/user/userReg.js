@@ -8,9 +8,7 @@ exports.regSchema = Yup.object().shape({
         .test('test-name', 'Enter Valid Email',
             function (value) {
                 const emailRegex = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-
                 let isValidEmail = emailRegex.test(value);
-
                 if (!isValidEmail) {
                     return false;
                 }
